@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: case-api
+  labels:
+    app: case-api  
+spec:
+  replicas: 3  
+  selector:
+    matchLabels:
+      app: case-api
+  template:
+    metadata:
+      labels:
+        app: case-api
+      annotations:
+        prometheus.io/port: '8080'
+        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: 'true'
+    spec:
+      containers:
+        - name: case-api-container
+          image: docker.io/library/case-api:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: case-api-configmap
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10

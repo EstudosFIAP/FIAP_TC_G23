@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 10s
+
+scrape_configs:
+  - job_name: 'FIAP_TC.Contact.Api-read-prometheus'
+    static_configs:
+      - targets: ['contact-api:8080'] # Alvo para a API de Contato
+
+  - job_name: 'FIAP_TC.Case.Api-read-prometheus'
+    static_configs:
+      - targets: ['case-api:8081'] # Alvo para a API de Atendimento/Case

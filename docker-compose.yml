@@ -1,0 +1,83 @@
+services:
+  contact-api:
+    image: ${DOCKER_REGISTRY-}contact-api
+    ports:
+      - 8080:8080
+    build:
+      context: .
+      dockerfile: FIAP_TC.Contact.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+    networks:
+      - mynw
+
+  case-api:
+    image: ${DOCKER_REGISTRY-}case-api
+    ports:
+      - 8081:8081
+    build:
+      context: .
+      dockerfile: FIAP_TC.Case.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8081
+    networks:
+      - mynw
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - mynw
+
+  rabbitmq:
+    image: "rabbitmq:management"
+    ports:
+        - "5672:5672"
+        - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - mynw
+    restart: always
+
+  consumer:
+    image: ${DOCKER_REGISTRY-}consumer
+    build:
+      context: .
+      dockerfile: Consumer/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - rabbitmq
+    restart: always  # Adicionado para garantir que reinicie automaticamente em caso de falha
+    networks:
+      - mynw
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - mynw
+
+networks:
+  mynw:
+    driver: bridge
+
+volumes:
+  grafana-storage:
+  rabbitmq_data:

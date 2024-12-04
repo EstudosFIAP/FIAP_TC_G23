@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contact-api
+  labels:
+    app: contact-api  
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contact-api
+  template:
+    metadata:
+      labels:
+        app: contact-api
+      annotations:
+        prometheus.io/port: '8080'
+        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: 'true'
+    spec:
+      containers:
+        - name: contact-api-container
+          image: docker.io/library/contact-api:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: contact-api-configmap

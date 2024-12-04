@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contact-api-configmap
+data:
+  LOG_LEVEL: "Info"
+  API_ENV: "Production"
+  DB_CONNECTION: "Server=tcp:sql-tc-fase1.database.windows.net,1433;Initial Catalog=db-tc-fase1;Persist Security Info=False;User ID=yourUserID;Password=yourPassword;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"

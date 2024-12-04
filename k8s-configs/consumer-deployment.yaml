@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  labels:
+    app: consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z rabbitmq.fiaptc.svc.cluster.local 5672; do echo waiting for rabbitmq; sleep 2; done;']
+      containers:
+        - name: consumer-container
+          image: docker.io/library/consumer:latest
+          imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: consumer-configmap
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
